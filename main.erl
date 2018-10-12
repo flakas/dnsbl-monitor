@@ -1,5 +1,5 @@
 -module(main).
--export(check_all/2).
+-export([check_all/2, check_ip_list/1]).
 
 -import(checker, [is_blacklisted/1]).
 

@@ -13,3 +13,14 @@ For an IP address of 12.23.34.45:
 2. Append DNSBL URI: `45.34.23.12.zen.spamhaus.org`
 3. Query your recursive DNS for A record of this URI, which will either result in an address if the IP address is listed, or `NXDOMAIN` if it is not
 4. For listed IPs query TXT record for the URI to find the explanatory message: `https://www.spamhaus.org/sbl/query/SBL123456`
+
+### How to use it
+If you do decide to use it:
+
+- Create a file with one IP address per line
+- In Erlang shell (`erl`) execute:
+
+```
+c(checker), c(main).
+main:check_all("my_file.txt", 10).
+```

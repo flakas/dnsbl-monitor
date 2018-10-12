@@ -1,5 +1,5 @@
 -module(checker).
--export(is_blacklisted/1).
+-export([is_blacklisted/1]).
 
 -include_lib("kernel/src/inet_res.hrl").
 
