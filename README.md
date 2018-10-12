@@ -22,5 +22,5 @@ If you do decide to use it:
 
 ```
 c(checker), c(main).
-main:check_all("my_file.txt", 10).
+main:show_all("my_file.txt", 10).
 ```

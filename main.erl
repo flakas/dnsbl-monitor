@@ -1,9 +1,27 @@
 -module(main).
--export([check_all/2, check_ip_list/1]).
+-export([show_all/2, get_all/2, check_ip_list/1]).
 
 -import(checker, [is_blacklisted/1]).
 
-check_all(File, Workers) ->
+show_all(File, Workers) ->
+  AllListings = lists:keysort(1, get_all(File, Workers)),
+  lists:foreach(fun ({IP, Listings}) ->
+                    show_ip_listings(IP, Listings)
+                end,
+                AllListings).
+
+show_ip_listings(_IP, []) ->
+  ok;
+show_ip_listings(IP, [{_, not_listed}|Rest]) ->
+  show_ip_listings(IP, Rest);
+show_ip_listings(IP, [{Blacklist, {listed, Messages}}|Rest]) ->
+  io:fwrite("~s: ~s (~s)~n", [IP, Blacklist, case is_list(Messages) of
+                                               true -> lists:flatten(Messages);
+                                               false -> unknown
+                                             end]),
+  show_ip_listings(IP, Rest).
+
+get_all(File, Workers) ->
   case file:read_file(File) of
     {ok, Contents} ->
       IPs = string:split(string:trim(binary:bin_to_list(Contents)), "\n", all),
