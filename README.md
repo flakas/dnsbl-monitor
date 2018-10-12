@@ -1,6 +1,8 @@
 # DNSBL Monitor
 
-This is an application whose sole intention is to monitor whether or not a set of given IPs can currently be found on a set of given blacklists.
+This is an application whose sole intention is to check whether or not a set of given IPs can currently be found on a set of given blacklists.
+
+This was done to learn more about Erlang and how blacklists work, and it's not really inteded for anyone to use it.
 
 ### How it works
 
