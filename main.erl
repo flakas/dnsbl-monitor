@@ -1,5 +1,5 @@
 -module(main).
--compile(export_all).
+-compile(check_all).
 
 -import(checker, [is_blacklisted/1]).
 
