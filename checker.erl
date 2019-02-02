@@ -7,7 +7,14 @@ blacklists() ->
   #{
     spamhaus => "zen.spamhaus.org",
     sorbs => "dnsbl.sorbs.net",
-    sorbs_spam => "spam.dnsbl.sorbs.net"
+    sorbs_spam => "spam.dnsbl.sorbs.net",
+    barracuda => "b.barracudacentral.org",
+    spamrats => "spam.spamrats.com",
+    spamcop => "bl.spamcop.net",
+    msrbl => "combined.rbl.msrbl.net",
+    ascams => "block.ascams.com",
+    ascams_super => "superblock.ascams.com",
+    manitu => "ix.dnsbl.manitu.net"
   }.
 
 is_blacklisted(IP) ->
