@@ -14,7 +14,14 @@ blacklists() ->
     msrbl => "combined.rbl.msrbl.net",
     ascams => "block.ascams.com",
     ascams_super => "superblock.ascams.com",
-    manitu => "ix.dnsbl.manitu.net"
+    manitu => "ix.dnsbl.manitu.net",
+    apews => "l2.apews.org",
+    nordspam => "bl.nordspam.com",
+    ratsall => "all.spamrats.com",
+    surbl_multi => "multi.surbl.org",
+    sem_black => "bl.spameatingmonkey.net",
+    sem_netblack => "netbl.spameatingmonkey.net",
+    unsubscribe_blacklist => "ubl.unsubscore.com"
   }.
 
 is_blacklisted(IP) ->
