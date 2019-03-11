@@ -18,9 +18,4 @@ For an IP address of 12.23.34.45:
 If you do decide to use it:
 
 - Create a file with one IP address per line
-- In Erlang shell (`erl`) execute:
-
-```
-c(checker), c(main).
-main:show_all("my_file.txt", 10).
-```
+- Run `mix check <filename>`

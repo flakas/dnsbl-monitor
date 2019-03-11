@@ -11,8 +11,8 @@ defmodule DnsblMonitor do
     end
   end
 
-  def show_ip_listings(_ip, []) do: :ok
-  def show_ip_listings(ip, [{_, :not_listed} | rest]) do: show_ip_listings(ip, rest)
+  def show_ip_listings(_ip, []), do: :ok
+  def show_ip_listings(ip, [{_, :not_listed} | rest]), do: show_ip_listings(ip, rest)
   def show_ip_listings(ip, [{blacklist, {:listed, messages}}|rest]) do
     IO.puts("#{ip}: #{blacklist} (#{List.flatten(messages)})")
     show_ip_listings(ip, rest)
