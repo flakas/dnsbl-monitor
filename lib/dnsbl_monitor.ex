@@ -25,10 +25,10 @@ defmodule DnsblMonitor do
     end
   end
 
-  def check_ips(ips) do
+  def check_ips(ips, timeout \\ 10000) do
     ips
-    |> Enum.map(fn ip -> {ip, Task.async(fn -> DnsblMonitor.Checker.is_blacklisted(ip) end)} end)
-    |> Enum.map(fn {ip, task} -> {ip, Task.await(task, 10000)} end)
+    |> Task.async_stream(fn ip -> {ip, DnsblMonitor.Checker.is_blacklisted(ip)} end, timeout: timeout)
+    |> Enum.map(fn {:ok, listings} -> listings end)
   end
 
 end

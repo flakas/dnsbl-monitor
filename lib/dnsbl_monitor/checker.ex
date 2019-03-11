@@ -22,8 +22,10 @@ defmodule DnsblMonitor.Checker do
     }
   end
 
-  def is_blacklisted(ip) do
-    for {blacklist, hostname} <- blacklists(), do: {blacklist, listed_on_blacklist(ip, hostname)}
+  def is_blacklisted(ip, timeout \\ 10000) do
+    blacklists()
+    |> Task.async_stream(fn {blacklist, hostname} -> {blacklist, listed_on_blacklist(ip, hostname)} end, timeout: timeout)
+    |> Enum.map(fn {:ok, listings} -> listings end)
   end
 
   def listed_on_blacklist(ip, blacklist) do
