@@ -1,34 +1,31 @@
 defmodule DnsblMonitor do
-  def show_all(file) do
-    case read_all_ips(file) do
-      {:ok, ips} ->
-        ips
-        |> check_ips
-        |> Enum.each(fn {ip, listings} -> show_ip_listings(ip, listings) end)
-
-        :ok
-      {:error, reason} -> {:error, reason}
+  def show_all(addresses_file, blacklists_file) when is_bitstring(addresses_file) and is_bitstring(blacklists_file) do
+    with {:ok, blacklists} <- read_lines(blacklists_file),
+         {:ok, addresses} <- read_lines(addresses_file) do
+      show_all(addresses, blacklists)
     end
   end
 
-  def show_ip_listings(_ip, []), do: :ok
-  def show_ip_listings(ip, [{_, :not_listed} | rest]), do: show_ip_listings(ip, rest)
-  def show_ip_listings(ip, [{blacklist, {:listed, messages}}|rest]) do
-    IO.puts("#{ip}: #{blacklist} (#{List.flatten(messages)})")
-    show_ip_listings(ip, rest)
+  def show_all(addresses, blacklists) when is_list(addresses) and is_list(blacklists) do
+    DnsblMonitor.Checker.are_listed_on_blacklists(addresses, blacklists)
+    |> Stream.filter(fn {_address, _blacklist, listing} -> listing != :not_listed end)
+    |> Enum.each(fn {address, blacklist, listing} -> show_address_listing(address, blacklist, listing) end)
   end
 
-  def read_all_ips(file) do
-    case File.read(file) do
+  def read_lines(path) do
+    case File.read(path) do
       {:ok, contents} -> {:ok, String.split(contents, "\n", trim: true)}
       {:error, reason} -> {:error, reason}
     end
   end
 
-  def check_ips(ips, timeout \\ 10000) do
-    ips
-    |> Task.async_stream(fn ip -> {ip, DnsblMonitor.Checker.is_blacklisted(ip)} end, timeout: timeout)
-    |> Enum.map(fn {:ok, listings} -> listings end)
+  def show_address_listing(address, blacklist, {:listed, ip, messages}) do
+    case messages do
+      :nxdomain -> IO.puts("#{address}: #{blacklist} -> #{ip}")
+      messages ->
+        for message <- messages do
+          IO.puts("#{address}: #{blacklist} -> #{ip} (#{message})")
+        end
+    end
   end
-
 end

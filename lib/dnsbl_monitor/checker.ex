@@ -1,47 +1,25 @@
 defmodule DnsblMonitor.Checker do
 
-  def blacklists() do
-    %{
-      :spamhaus => "zen.spamhaus.org",
-      :sorbs => "dnsbl.sorbs.net",
-      :sorbs_spam => "spam.dnsbl.sorbs.net",
-      :barracuda => "b.barracudacentral.org",
-      :spamrats => "spam.spamrats.com",
-      :spamcop => "bl.spamcop.net",
-      :msrbl => "combined.rbl.msrbl.net",
-      :ascams => "block.ascams.com",
-      :ascams_super => "superblock.ascams.com",
-      :manitu => "ix.dnsbl.manitu.net",
-      :apews => "l2.apews.org",
-      :nordspam => "bl.nordspam.com",
-      :ratsall => "all.spamrats.com",
-      :surbl_multi => "multi.surbl.org",
-      :sem_black => "bl.spameatingmonkey.net",
-      :sem_netblack => "netbl.spameatingmonkey.net",
-      :unsubscribe_blacklist => "ubl.unsubscore.com"
-    }
+  def are_listed_on_blacklists(addresses, blacklists, timeout \\ 10000) do
+    Stream.flat_map(addresses, fn address -> Stream.map(blacklists, &{address, &1}) end)
+    |> Task.async_stream(fn {address, blacklist} -> {address, blacklist, listed_on_blacklist(address, blacklist)} end, timeout: timeout)
+    |> Stream.map(fn {:ok, listings} -> listings end)
   end
 
-  def is_blacklisted(ip, timeout \\ 10000) do
-    blacklists()
-    |> Task.async_stream(fn {blacklist, hostname} -> {blacklist, listed_on_blacklist(ip, hostname)} end, timeout: timeout)
-    |> Enum.map(fn {:ok, listings} -> listings end)
-  end
-
-  def listed_on_blacklist(ip, blacklist) do
-    hostname = reverse_ip_octets(ip) <> "." <> blacklist
+  def listed_on_blacklist(address, blacklist) do
+    hostname = prepare_address(address) <> "." <> blacklist
     query = :inet_res.getbyname(to_charlist(hostname), :a)
     case query do
-      {:ok, _} -> {:listed, get_explanatory_message(hostname)}
+      {:ok, {:hostent, _, _, _, _, ips}} -> {:listed, to_string(:inet.ntoa(hd(ips))), get_explanatory_message(hostname)}
       {:error, _} -> :not_listed
     end
   end
 
-  def reverse_ip_octets(ip) do
-    ip
-    |> String.split(".")
-    |> Enum.reverse()
-    |> Enum.join(".")
+  def prepare_address(address) do
+    case :inet.parse_ipv4_address(to_charlist(address)) do
+      {:ok, address} -> reverse_ipv4_octets(to_string(:inet.ntoa(address)))
+      {:error, _} -> address
+    end
   end
 
   def get_explanatory_message(hostname) do
@@ -53,6 +31,13 @@ defmodule DnsblMonitor.Checker do
       {:error, err} ->
         err
     end
+  end
+
+  def reverse_ipv4_octets(ip) do
+    ip
+    |> String.split(".")
+    |> Enum.reverse()
+    |> Enum.join(".")
   end
 
 end
