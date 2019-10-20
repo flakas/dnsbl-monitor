@@ -2,7 +2,7 @@ defmodule DnsblMonitor.Checker do
 
   def are_listed_on_blacklists(addresses, blacklists, timeout \\ 10000) do
     Stream.flat_map(addresses, fn address -> Stream.map(blacklists, &{address, &1}) end)
-    |> Task.async_stream(fn {address, blacklist} -> {address, blacklist, listed_on_blacklist(address, blacklist)} end, timeout: timeout)
+    |> Task.async_stream(fn {address, blacklist} -> {address, blacklist, listed_on_blacklist(address, blacklist)} end, timeout: timeout, max_concurrency: System.schedulers_online())
     |> Stream.map(fn {:ok, listings} -> listings end)
   end
 
